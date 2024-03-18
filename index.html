@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      canvas {
+        /* border: 1px solid black; */
+        cursor: crosshair;
+      }
+      h2 {
+        font-family: sans-serif;
+        color: #000000;
+      }
+
+      * {
+        font-family: sans-serif;
+        box-sizing: border-box;
+        text-decoration: none;
+      }
+      .wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      button {
+        background: none;
+        border: none;
+        position: relative;
+        display: inline-block;
+        padding: 25px 30px;
+        text-transform: uppercase;
+        color: #d946ef;
+        font-weight: bold;
+        transition: 0.5s;
+        overflow: hidden;
+        margin-right: 70px;
+      }
+      button:hover {
+        background-color: #d946ef;
+        color: #050801;
+        cursor: grab;
+        box-shadow: 0 0 5px #d946ef, 0 0 25px #d946ef, 0 0 50px #d946ef,
+          0 0 200px #d946ef;
+
+        -webkit-box-reflect: below 1px linear-gradient(transparent, #0005);
+      }
+      button:first-child {
+        filter: hue-rotate(60deg);
+      }
+      button:last-child {
+        filter: hue-rotate(300deg);
+      }
+      button span {
+        position: absolute;
+        display: block;
+      }
+      button span:nth-child(1) {
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #d946ef);
+        animation: animate1 1s infinite;
+      }
+      @keyframes animate1 {
+        0% {
+          left: -100%;
+        }
+        100% {
+          left: 100%;
+        }
+      }
+      button span:nth-child(2) {
+        top: -100%;
+        right: 0;
+        width: 2px;
+        height: 100%;
+        background: linear-gradient(180deg, transparent, #d946ef);
+        animation: animate2 1s infinite;
+        animation-delay: 0.25s;
+      }
+      @keyframes animate2 {
+        0% {
+          top: -100%;
+        }
+        100% {
+          top: 100%;
+        }
+      }
+      button span:nth-child(3) {
+        bottom: 0;
+        right: 0;
+        width: 100%;
+        height: 2px;
+        background: linear-gradient(270deg, transparent, #d946ef);
+        animation: animate3 1s infinite;
+        animation-delay: 0.5s;
+      }
+      @keyframes animate3 {
+        0% {
+          right: -100%;
+        }
+        100% {
+          right: 100%;
+        }
+      }
+      button span:nth-child(4) {
+        bottom: -100;
+        left: 0;
+        width: 2px;
+        height: 100%;
+        background: linear-gradient(360deg, transparent, #d946ef);
+        animation: animate4 1s infinite;
+        animation-delay: 0.75s;
+      }
+      @keyframes animate4 {
+        0% {
+          bottom: -100%;
+        }
+        100% {
+          bottom: 100%;
+        }
+      }
+      #info {
+        display: flex;
+        justify-content: space-between;
+      }
+      #info p {
+        color: #000000;
+        font-family: sans-serif;
+        font-size: small;
+        font-weight: bold;
+      }
+      .about {
+        display: none;
+      }
+
+      .popup .overlay {
+        position: fixed;
+        top: 0px;
+        left: 0px;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 1;
+        display: none;
+      }
+
+      .popup .content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0);
+        background: #fff;
+        width: 450px;
+        height: 320px;
+        z-index: 2;
+        text-align: center;
+        padding: 20px;
+        box-sizing: border-box;
+      }
+
+      .popup .close-btn {
+        position: absolute;
+        right: 20px;
+        top: 20px;
+        width: 30px;
+        height: 30px;
+        background: #222;
+        color: #fff;
+        font-size: 25px;
+        font-weight: 700;
+        line-height: 30px;
+        text-align: center;
+        border-radius: 50%;
+      }
+
+      .popup .close-btn:hover {
+        cursor: grab;
+      }
+
+      .popup.active .overlay {
+        display: block;
+      }
+
+      .popup.active .content {
+        transition: all 300ms ease-in-out;
+        transform: translate(-50%, -50%) scale(1);
+      }
+    </style>
+  </head>
+  <body>
+    <h2>User interaction (Using canvas API)</h2>
+    <canvas id="canvas" width="800" height="600"></canvas>
+    <div id="info"></div>
+    <!--  -->
+    <div class="popup" id="popup-1">
+      <div class="overlay"></div>
+      <div class="content">
+        <div class="close-btn" onclick="togglePopup()">&times;</div>
+        <h1>About Feature</h1>
+        <p>
+          This program makes use of the canvas API for user interaction. The
+          program allows you to select three arbitrary points. A red circle is
+          drawn to mark each point selected. After the selections, a blue
+          parallelogram is drawn using the three points. A yellow circle with
+          the same area and center of mass as the parallelogram is also drawn.
+          You can move the points around, and the shapes and information will
+          update accordingly. You can also reset the canvas to select new
+          points.
+        </p>
+      </div>
+    </div>
+
+    <div class="wrapper">
+      <button href="" onclick="reset()">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        Reset
+      </button>
+      <button onclick="togglePopup()">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        About
+      </button>
+    </div>
+
+    <script>
+      const canvas = document.getElementById("canvas");
+      const ctx = canvas.getContext("2d");
+
+      canvas.height = window.innerHeight - 210;
+      canvas.width = window.innerWidth;
+
+      let points = [];
+      let parallelogramArea = 0;
+      let circleArea = 0;
+
+      canvas.addEventListener("click", handleCanvasClick);
+
+      function handleCanvasClick(event) {
+        const rect = canvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        points.push({ x, y });
+        console.log(`x: ${x}, y: ${y}`);
+        if (points.length <= 3) {
+          drawPoint(x, y);
+          if (points.length === 3) {
+            calculateShapes();
+          }
+        }
+      }
+
+      function drawPoint(x, y) {
+        ctx.beginPath();
+        ctx.strokeStyle = "red";
+        ctx.arc(x, y, 5.5, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      function calculateShapes() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawPoints();
+        parallelogramArea = calculateParallelogramArea(
+          points[0],
+          points[1],
+          points[2]
+        );
+        circleArea = parallelogramArea;
+        drawParallelogram();
+        drawCircle();
+        displayInfo();
+      }
+
+      function drawPoints() {
+        points.forEach((point) => drawPoint(point.x, point.y));
+      }
+
+      function drawParallelogram() {
+        ctx.beginPath();
+        ctx.strokeStyle = "blue";
+        ctx.moveTo(points[0].x, points[0].y);
+        ctx.lineTo(points[1].x, points[1].y);
+        ctx.lineTo(
+          points[2].x + (points[1].x - points[0].x),
+          points[2].y + (points[1].y - points[0].y)
+        );
+        ctx.lineTo(points[2].x, points[2].y);
+        ctx.closePath();
+        ctx.stroke();
+      }
+
+      function drawCircle() {
+        const centerX =
+          (points[0].x +
+            points[1].x +
+            points[2].x +
+            (points[2].x + (points[1].x - points[0].x))) /
+          4;
+        const centerY =
+          (points[0].y +
+            points[1].y +
+            points[2].y +
+            points[2].y +
+            (points[1].y - points[0].y)) /
+          4;
+        const radius = Math.sqrt(circleArea / Math.PI);
+        ctx.beginPath();
+        ctx.strokeStyle = "yellow";
+        ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      function calculateParallelogramArea(point1, point2, point3) {
+        return Math.abs(
+          (point1.x * (point2.y - point3.y) +
+            point2.x * (point3.y - point1.y) +
+            point3.x * (point1.y - point2.y)) /
+            2
+        );
+      }
+
+      function displayInfo() {
+        document.getElementById("info").innerHTML = `
+            <p>Selected Points (X, Y): (${Math.round(
+              points[0].x
+            )}, ${Math.round(points[0].y)}), (${Math.round(
+          points[1].x
+        )}, ${Math.round(points[1].y)}), (${Math.round(
+          points[2].x
+        )}, ${Math.round(points[2].y)})</p>
+            <p>Parallelogram Area: ${parallelogramArea.toFixed(2)}</p>
+            <p>Circle Area: ${circleArea.toFixed(2)}</p>
+        `;
+      }
+
+      function reset() {
+        points = [];
+        parallelogramArea = 0;
+        circleArea = 0;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        document.getElementById("info").innerHTML = "";
+      }
+
+      function togglePopup() {
+        document.getElementById("popup-1").classList.toggle("active");
+      }
+    </script>
+  </body>
+</html>
