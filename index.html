@@ -189,6 +189,12 @@
         transition: all 300ms ease-in-out;
         transform: translate(-50%, -50%) scale(1);
       }
+
+      .author {
+        color: #3b82f6;
+        margin-top: 5px;
+        padding-top: 10px;
+      }
     </style>
   </head>
   <body>
@@ -211,6 +217,7 @@
           update accordingly. You can also reset the canvas to select new
           points.
         </p>
+        <span class="author">Author: Richmond Nyame</span>
       </div>
     </div>
 
@@ -241,28 +248,84 @@
       let points = [];
       let parallelogramArea = 0;
       let circleArea = 0;
+      let selectedPointIndex = -1; // Index of the selected point being dragged
+      let isDragging = false;
 
       canvas.addEventListener("click", handleCanvasClick);
 
-      function handleCanvasClick(event) {
-        const rect = canvas.getBoundingClientRect();
-        const x = event.clientX - rect.left;
-        const y = event.clientY - rect.top;
-        points.push({ x, y });
-        console.log(`x: ${x}, y: ${y}`);
-        if (points.length <= 3) {
-          drawPoint(x, y);
-          if (points.length === 3) {
-            calculateShapes();
-          }
-        }
-      }
+      canvas.addEventListener("mousedown", handleMouseDown);
+      canvas.addEventListener("mousemove", handleMouseMove);
+      canvas.addEventListener("mouseup", handleMouseUp);
 
       function drawPoint(x, y) {
         ctx.beginPath();
         ctx.strokeStyle = "red";
         ctx.arc(x, y, 5.5, 0, Math.PI * 2);
         ctx.stroke();
+      }
+
+      function handleCanvasClick(event) {
+        const rect = canvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        const clickedIndex = getSelectedPointIndex(x, y);
+
+        if (clickedIndex === -1) {
+          // If click occurs on empty space, add a new point
+          points.push({ x, y });
+          console.log(`x: ${x}, y: ${y}`);
+          if (points.length <= 3) {
+            drawPoint(x, y);
+            if (points.length === 3) {
+              calculateShapes();
+            }
+          }
+        } else {
+          // Selecting an already existing point to start dragging
+          selectedPointIndex = clickedIndex;
+          isDragging = true;
+        }
+      }
+
+      function handleMouseDown(event) {
+        const rect = canvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        selectedPointIndex = getSelectedPointIndex(x, y);
+        if (selectedPointIndex !== -1) {
+          isDragging = true;
+          canvas.addEventListener("mousemove", handleMouseMove);
+        }
+      }
+
+      function handleMouseMove(event) {
+        if (isDragging) {
+          const rect = canvas.getBoundingClientRect();
+          const x = event.clientX - rect.left;
+          const y = event.clientY - rect.top;
+          points[selectedPointIndex] = { x, y };
+          calculateShapes();
+        }
+      }
+
+      function handleMouseUp() {
+        selectedPointIndex = -1;
+        isDragging = false;
+        canvas.removeEventListener("mousemove", handleMouseMove);
+      }
+
+      function getSelectedPointIndex(x, y) {
+        for (let i = 0; i < points.length; i++) {
+          const point = points[i];
+          if (Math.abs(point.x - x) <= 5 && Math.abs(point.y - y) <= 5) {
+            return i;
+          }
+        }
+        return -1;
+      }
+
+      function drawPoints() {
+        points.forEach((point) => drawPoint(point.x, point.y));
       }
 
       function calculateShapes() {
@@ -277,10 +340,6 @@
         drawParallelogram();
         drawCircle();
         displayInfo();
-      }
-
-      function drawPoints() {
-        points.forEach((point) => drawPoint(point.x, point.y));
       }
 
       function drawParallelogram() {
